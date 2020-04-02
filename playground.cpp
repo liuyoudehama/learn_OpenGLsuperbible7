@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <vector>
 
 std::string read_shader_code_from_file(const char *file_path);
 GLuint compile_shaders(void);
@@ -43,7 +44,8 @@ public:
 
         glUseProgram(rendering_program);
 
-        GLfloat attrib[] = {
+        GLfloat attrib[] =
+        {
             (float)sin(currentTime) * 0.5f,
             (float)cos(currentTime) * 0.6f,
             0.0f,
@@ -56,14 +58,38 @@ public:
         glVertexAttrib4fv(1, current_color);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        
+
     }
 };
 // Our one and only instance of DECLARE_MAIN
 DECLARE_MAIN(my_application);
 
 
+bool is_successful_compiled(GLuint shader)
+{
+    GLint isCompiled = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
 
+    if(isCompiled == GL_FALSE)
+    {
+        GLint maxLength = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+        // The maxLength includes the NULL character
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
+
+        // Provide the infolog in whatever manor you deem best.
+        // Exit with failure.
+
+        for(auto ch : errorLog) std::cout << ch;
+        std::cout << std::endl;
+
+        glDeleteShader(shader); // Don't leak the shader.
+        return false;
+    }
+    return true;
+}
 
 std::string read_shader_code_from_file(const char *file_path)
 {
@@ -86,17 +112,21 @@ GLuint compile_shaders(void)
     GLuint program;
 
     std::string vertex_shader_code = read_shader_code_from_file("../shaders/playground.vert.glsl");
-    const char* p_vertex_shader = vertex_shader_code.c_str();
+    const char *p_vertex_shader = vertex_shader_code.c_str();
     std::string fragment_shader_code = read_shader_code_from_file("../shaders/playground.frag.glsl");
-    const char* p_fragment_shader = fragment_shader_code.c_str();
+    const char *p_fragment_shader = fragment_shader_code.c_str();
 
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &p_vertex_shader, NULL);
     glCompileShader(vertex_shader);
+    std::cout << "compiling vertex shader:" << std::endl;
+    if(!is_successful_compiled(vertex_shader)) return -1;
 
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &p_fragment_shader, NULL);
     glCompileShader(fragment_shader);
+    std::cout << "compiling fragment shader:" << std::endl;
+    if(!is_successful_compiled(fragment_shader)) return -1;
 
     program = glCreateProgram();
     glAttachShader(program, vertex_shader);
