@@ -43,9 +43,17 @@ public:
 
         glUseProgram(rendering_program);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        GLfloat attrib[] = {
+            (float)sin(currentTime) * 0.5f,
+            (float)cos(currentTime) * 0.6f,
+            0.0f,
+            0.0f
+        };
 
-        glPointSize(40.0f);
+        glVertexAttrib4fv(0, attrib);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        
     }
 };
 // Our one and only instance of DECLARE_MAIN
