@@ -50,7 +50,10 @@ public:
             0.0f
         };
 
+        GLfloat current_color[] = { (float)sin(currentTime) * 0.5f + 0.5f, (float)cos(currentTime) * 0.5f + 0.5f, 0.0f, 1.0f};
+
         glVertexAttrib4fv(0, attrib);
+        glVertexAttrib4fv(1, current_color);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
         
