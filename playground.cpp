@@ -43,7 +43,7 @@ public:
 
         glUseProgram(rendering_program);
 
-        glDrawArrays(GL_POINTS, 0, 1);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glPointSize(40.0f);
     }
