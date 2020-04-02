@@ -1,7 +1,14 @@
 // Include the "sb7.h" header file
 #include "sb7.h"
 #include <math.h>
+#include <fstream>
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <sstream>
+#include <memory>
 
+std::string read_shader_code_from_file(const char *file_path);
 GLuint compile_shaders(void);
 
 // Derive my_application from sb7::application
@@ -31,7 +38,7 @@ public:
     void render(double currentTime)
     {
         // Simply clear the window with red
-        static const GLfloat red[] = { (float)sin(currentTime) * 0.5f + 0.5f, (float)cos(currentTime) * 0.5f + 0.5f, 0.0f , 1.0f};
+        static const GLfloat red[] = { (float)sin(currentTime) * 0.5f + 0.5f, (float)cos(currentTime) * 0.5f + 0.5f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, red);
 
         glUseProgram(rendering_program);
@@ -45,40 +52,39 @@ public:
 DECLARE_MAIN(my_application);
 
 
+
+
+std::string read_shader_code_from_file(const char *file_path)
+{
+    std::string shader_code;
+    std::ifstream shader_file_stream(file_path, std::ios::in);
+    if(shader_file_stream.is_open())
+    {
+        std::stringstream buf;
+        buf << shader_file_stream.rdbuf();
+        shader_file_stream.close();
+        shader_code = buf.str();
+    }
+    return shader_code;
+}
+
 GLuint compile_shaders(void)
 {
     GLuint vertex_shader;
     GLuint fragment_shader;
     GLuint program;
 
-    static const GLchar * vertex_shader_source[] = 
-    {
-        "#version 450 core                                  \n"
-        "                                                   \n"
-        "void main(void)                                    \n"
-        "{                                                  \n"
-        "       gl_Position = vec4(0.0, 0.0, 0.5, 1.0);     \n"
-        "}                                                  \n"
-    };
-
-    static const GLchar * fragment_shader_source[] = 
-    {
-        "#version 450 core                                  \n"
-        "                                                   \n"
-        "out vec4 color;                                    \n"
-        "                                                   \n"
-        "void main(void)                                    \n"
-        "{                                                  \n"
-        "       color = vec4(0.0, 0.8, 0.5, 1.0);           \n"
-        "}                                                  \n"
-    };
+    std::string vertex_shader_code = read_shader_code_from_file("../shaders/playground.vert.glsl");
+    const char* p_vertex_shader = vertex_shader_code.c_str();
+    std::string fragment_shader_code = read_shader_code_from_file("../shaders/playground.frag.glsl");
+    const char* p_fragment_shader = fragment_shader_code.c_str();
 
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, vertex_shader_source, NULL);
+    glShaderSource(vertex_shader, 1, &p_vertex_shader, NULL);
     glCompileShader(vertex_shader);
 
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, fragment_shader_source, NULL);
+    glShaderSource(fragment_shader, 1, &p_fragment_shader, NULL);
     glCompileShader(fragment_shader);
 
     program = glCreateProgram();
