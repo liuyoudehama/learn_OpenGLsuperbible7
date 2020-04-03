@@ -54,7 +54,7 @@ public:
     void render(double currentTime)
     {
         // Simply clear the window with red
-        static const GLfloat red[] = { (float)sin(currentTime) * 0.5f + 0.5f, (float)cos(currentTime) * 0.5f + 0.5f, 0.0f, 1.0f};
+        static const GLfloat red[] = { 0.0f, 0.0f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, red);
         
         glUseProgram(rendering_program);
@@ -71,6 +71,7 @@ public:
 
         glVertexAttrib4fv(0, attrib);
         glVertexAttrib4fv(1, current_color);
+
         GLClearError();
         glDrawArrays(GL_TRIANGLES, 0, 3);
         GLCheckError();
@@ -148,11 +149,21 @@ GLuint compile_shaders(void)
     GLuint fragment_shader = compile_shaders_from_file("../shaders/playground.frag.glsl", GL_FRAGMENT_SHADER);
     if(vertex_shader == -1) std::cout << "failed." << std::endl;
     
-    
+    std::cout << "compiling tcs shader:" << std::endl;
+    GLuint tcs_shader = compile_shaders_from_file("../shaders/playground.tcs.glsl", GL_TESS_CONTROL_SHADER);
+    if(tcs_shader == -1) std::cout << "failed." << std::endl;
+
+    std::cout << "compiling tes shader:" << std::endl;
+    GLuint tes_shader = compile_shaders_from_file("../shaders/playground.tes.glsl", GL_TESS_EVALUATION_SHADER);
+    if(tes_shader == -1) std::cout << "failed." << std::endl;
 
     program = glCreateProgram();
+
     glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
+    glAttachShader(program, tcs_shader);
+    glAttachShader(program, tes_shader);
+
     glLinkProgram(program);
 
     glDeleteShader(vertex_shader);
