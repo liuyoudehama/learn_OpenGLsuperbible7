@@ -14,19 +14,6 @@ GLuint compile_shaders(void);
 GLuint compile_shaders_from_file(const char *file_path, GLenum shader_type);
 bool is_successful_compiled(GLuint shader);
 
-static void GLClearError()
-{
-    while(glGetError() != GL_NO_ERROR);
-}
-
-static void GLCheckError()
-{
-    while(GLenum error = glGetError())
-    {
-        std::cout << "[OpenGL Error] (" << error << ")" << std::endl;
-    }
-}
-
 // Derive my_application from sb7::application
 class my_application : public sb7::application
 {
@@ -38,7 +25,9 @@ public:
     void startup()
     {
         rendering_program = compile_shaders();
+
         glCreateVertexArrays(1, &vertex_array_object);
+
         glBindVertexArray(vertex_array_object);
     }
 
@@ -53,11 +42,17 @@ public:
     // Our rendering function
     void render(double currentTime)
     {
+
+
         // Simply clear the window with red
         static const GLfloat red[] = { 0.0f, 0.0f, 0.0f, 1.0f};
+
         glClearBufferfv(GL_COLOR, 0, red);
-        
-        glUseProgram(rendering_program);
+
+        printf("program id : %d\n", rendering_program);
+        GLClearError();
+        glUseProgram(rendering_program); // have problem
+        GLCheckError();
 
         GLfloat attrib[] =
         {
@@ -72,9 +67,8 @@ public:
         glVertexAttrib4fv(0, attrib);
         glVertexAttrib4fv(1, current_color);
 
-        GLClearError();
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        GLCheckError();
+
     }
 };
 // Our one and only instance of DECLARE_MAIN
@@ -104,6 +98,33 @@ bool is_successful_compiled(GLuint shader)
         glDeleteShader(shader); // Don't leak the shader.
         return false;
     }
+    return true;
+}
+
+bool is_successful_linked(GLuint program)
+{
+    GLint isLinked = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
+    if (isLinked == GL_FALSE)
+    {
+        GLint maxLength = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+        // The maxLength includes the NULL character
+        std::vector<GLchar> infoLog(maxLength);
+        glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+
+        for(auto ch : infoLog) std::cout << ch;
+        std::cout << std::endl;
+
+        // The program is useless now. So delete it.
+        glDeleteProgram(program);
+
+        // Provide the infolog in whatever manner you deem best.
+        // Exit with failure.
+        return false;
+    }
+
     return true;
 }
 
@@ -144,11 +165,11 @@ GLuint compile_shaders(void)
     std::cout << "compiling vertex shader:" << std::endl;
     GLuint vertex_shader = compile_shaders_from_file("../shaders/playground.vert.glsl", GL_VERTEX_SHADER);
     if(vertex_shader == -1) std::cout << "failed." << std::endl;
-    
+
     std::cout << "compiling fragment shader:" << std::endl;
     GLuint fragment_shader = compile_shaders_from_file("../shaders/playground.frag.glsl", GL_FRAGMENT_SHADER);
     if(vertex_shader == -1) std::cout << "failed." << std::endl;
-    
+
     std::cout << "compiling tcs shader:" << std::endl;
     GLuint tcs_shader = compile_shaders_from_file("../shaders/playground.tcs.glsl", GL_TESS_CONTROL_SHADER);
     if(tcs_shader == -1) std::cout << "failed." << std::endl;
@@ -166,8 +187,12 @@ GLuint compile_shaders(void)
 
     glLinkProgram(program);
 
+    if(!is_successful_linked(program)) return 0;
+
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+    glDeleteShader(tcs_shader);
+    glDeleteShader(tes_shader);
 
     return program;
 }

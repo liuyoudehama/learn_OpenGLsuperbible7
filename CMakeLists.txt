@@ -2,7 +2,9 @@ cmake_minimum_required (VERSION 2.6)
 
 project (superbible7_playground)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LINUX -std=c++0x")
+#set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_LINUX -g -std=c++0x")
 
 include_directories( include )
 include_directories(extern/glfw-3.0.4/include)
