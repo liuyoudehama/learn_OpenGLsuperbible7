@@ -50,6 +50,20 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include <iostream>
+
+static void GLClearError()
+{
+    while(glGetError() != GL_NO_ERROR);
+}
+
+static void GLCheckError()
+{
+    while(GLenum error = glGetError())
+    {
+        std::cout << "[OpenGL Error] (" << error << ")" << std::endl;
+    }
+}
 
 namespace sb7
 {
