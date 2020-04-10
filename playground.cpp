@@ -42,7 +42,9 @@ public:
     // Our rendering function
     void render(double currentTime)
     {
-
+        // before render
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         // Simply clear the window with red
         static const GLfloat red[] = { 0.0f, 0.0f, 0.0f, 1.0f};
@@ -67,7 +69,7 @@ public:
         glVertexAttrib4fv(0, attrib);
         glVertexAttrib4fv(1, current_color);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_PATCHES, 0, 4);
 
     }
 };
@@ -103,6 +105,7 @@ bool is_successful_compiled(GLuint shader)
 
 bool is_successful_linked(GLuint program)
 {
+    std::cout << "checking link error." << std::endl;
     GLint isLinked = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
     if (isLinked == GL_FALSE)

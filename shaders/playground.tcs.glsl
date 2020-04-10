@@ -2,16 +2,6 @@
 
 layout (vertices = 3) out;
 
-in VS_OUT
-{
-	vec4 color;
-} tcs_in[];
-
-in TCS_OUT
-{
-	vec4 color;
-} tcs_out[];
-
 void main(void)
 {
 	if(gl_InvocationID == 0)
@@ -23,6 +13,4 @@ void main(void)
 	}
 
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-
-	tcs_out[gl_InvocationID].color = tcs_in[gl_InvocationID].color;	
 }
